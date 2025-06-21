@@ -80,6 +80,46 @@ class NewsletterByID(Resource):
 
         return response
 
+    def patch(self, id):
+        record = Newsletter.query.filter_by(id=id).first()
+        
+        if not record:
+            return make_response({"error": "Newsletter not found"}, 404)
+            
+        for attr in request.form:
+            if hasattr(record, attr):  # Only update if attribute exists
+                setattr(record, attr, request.form[attr])
+
+        db.session.add(record)
+        db.session.commit()
+
+        response_dict = record.to_dict()
+
+        response = make_response(
+            response_dict,
+            200
+        )
+
+        return response
+
+    def delete(self, id):
+        record = Newsletter.query.filter_by(id=id).first()
+        
+        if not record:
+            return make_response({"error": "Newsletter not found"}, 404)
+
+        db.session.delete(record)
+        db.session.commit()
+
+        response_dict = {"message": "Record successfully deleted"}
+
+        response = make_response(
+            response_dict,
+            200
+        )
+
+        return response
+
 api.add_resource(NewsletterByID, '/newsletters/<int:id>')
 
 
